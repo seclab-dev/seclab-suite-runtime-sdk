@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "seclab.packet",
+  "instanceId": "instance-2",
+  "endpoint": {
+    "kind": "https",
+    "baseUrl": "https://host.docker.internal:9443",
+    "caPath": "/run/seclab-agent/agent-ca.crt",
+    "clientCertPath": "/run/seclab-agent/agent-client.crt",
+    "clientKeyPath": "/run/seclab-agent/agent-client.key"
+  },
+  "credential": { "tokenPath": "/run/seclab-agent/access-token" },
+  "capabilities": ["operation-logs.write"]
+}
+

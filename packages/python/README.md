@@ -1,0 +1,7 @@
+# Python Runtime SDK
+
+通过 `RuntimeClient.from_environment()` 读取 Agent 注入的 Runtime 描述，并使用 `submit_operation_event()` 提交语义操作事件。
+
+用户请求触发事件时，使用 `operation_context_from_headers(request.headers)` 读取
+`x-seclab-operation-context`，并写入事件的 `operation_context_id`。SDK 不接受
+用户名或客户端 IP，由 Agent 根据上下文恢复可信用户身份。

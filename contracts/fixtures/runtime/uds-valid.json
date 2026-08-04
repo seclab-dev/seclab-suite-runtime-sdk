@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "seclab.host-scanner",
+  "instanceId": "instance-1",
+  "endpoint": { "kind": "unix", "socketPath": "/run/seclab-agent.sock", "baseUrl": "http://local" },
+  "credential": { "tokenPath": "/run/seclab-agent/access-token" },
+  "capabilities": ["operation-logs.write"]
+}
+
