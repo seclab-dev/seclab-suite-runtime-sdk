@@ -2,11 +2,13 @@
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] - 2026-08-11
+
 ### Added
 
 - Rust 与 Python SDK 新增受控工作负载 API，支持创建、查询和删除工作负载。
 - 工作负载支持具名 TCP/UDP 多端点，并可对全部公开端点启动抓包和获取 PCAP 数据。
-- 新增工作负载 v1 JSON Schema 与跨语言黄金 fixture。
+- 新增工作负载 v1 JSON Schema 与跨语言标准契约样例。
 - 新增 workload HTTP 路径、Bearer 认证、响应解析及严格 SemVer 校验测试。
 
 ### Changed

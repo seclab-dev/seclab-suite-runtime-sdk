@@ -743,7 +743,7 @@ dependencies = [
 
 [[package]]
 name = "seclab-suite-runtime-sdk"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "reqwest",
  "semver",

@@ -1,6 +1,6 @@
 [package]
 name = "seclab-suite-runtime-sdk"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 edition = "2024"
 license = "MIT"
 description = "SecLab trusted suite backend runtime SDK"
