@@ -8,12 +8,25 @@ from .operation_logs import (
     OperationEvent,
     operation_context_from_headers,
 )
-from .types import OperationImpact, OperationOutcome, OperationTarget
+from .types import (
+    CaptureEndpoint,
+    OperationImpact,
+    OperationOutcome,
+    OperationTarget,
+    StartCaptureResponse,
+    StartWorkloadRequest,
+    StartWorkloadResponse,
+    WorkloadPort,
+    WorkloadResources,
+    WorkloadSummary,
+    WorkloadTransport,
+)
 
 __all__ = [
     "OPERATION_CONTEXT_HEADER",
     "AgentError",
     "CapabilityDenied",
+    "CaptureEndpoint",
     "InvalidDescriptor",
     "InvalidEvent",
     "OperationEvent",
@@ -23,5 +36,12 @@ __all__ = [
     "RuntimeClient",
     "RuntimeDescriptor",
     "RuntimeEndpoint",
+    "StartCaptureResponse",
+    "StartWorkloadRequest",
+    "StartWorkloadResponse",
+    "WorkloadPort",
+    "WorkloadResources",
+    "WorkloadSummary",
+    "WorkloadTransport",
     "operation_context_from_headers",
 ]

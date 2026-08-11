@@ -1,16 +1,56 @@
 import json
+import re
 from pathlib import Path
 
+import pytest
+
 from seclab_suite_runtime import OperationEvent, RuntimeDescriptor
+from seclab_suite_runtime.errors import InvalidDescriptor
 from seclab_suite_runtime.types import OperationImpact, OperationOutcome, OperationTarget
 
 FIXTURES = Path(__file__).parents[3] / "contracts" / "fixtures"
+RUNTIME_SCHEMA = FIXTURES.parent / "schemas" / "runtime-descriptor.schema.json"
 
 
 def test_shared_runtime_fixture() -> None:
     descriptor = RuntimeDescriptor.load(FIXTURES / "runtime" / "uds-valid.json")
     assert descriptor.schema_version == 1
     descriptor.require_identity("seclab.host-scanner", "instance-1")
+
+
+@pytest.mark.parametrize(
+    ("platform_version", "accepted"),
+    [
+        ("0.1.0-alpha.3", True),
+        ("1.2.3+build.7", True),
+        ("1.2.3-invalid@@", False),
+        ("01.2.3", False),
+        ("1.2.3-alpha..1", False),
+        ("1.2", False),
+    ],
+)
+def test_runtime_schema_uses_strict_semver(platform_version: str, accepted: bool) -> None:
+    schema = json.loads(RUNTIME_SCHEMA.read_text(encoding="utf-8"))
+    pattern = schema["properties"]["platformVersion"]["pattern"]
+    assert (re.fullmatch(pattern, platform_version) is not None) is accepted
+
+
+@pytest.mark.parametrize(
+    "platform_version",
+    ["1.2.3-invalid@@", "01.2.3", "1.2.3-alpha..1", "1.2"],
+)
+def test_runtime_descriptor_rejects_invalid_semver(platform_version: str) -> None:
+    descriptor = RuntimeDescriptor(
+        schema_version=1,
+        platform_version=platform_version,
+        suite_id="seclab.host-scanner",
+        instance_id="instance-1",
+        endpoint=RuntimeDescriptor.load(FIXTURES / "runtime" / "uds-valid.json").endpoint,
+        token_path=Path("/run/seclab-agent/access-token"),
+        capabilities=("operation-logs.write",),
+    )
+    with pytest.raises(InvalidDescriptor):
+        descriptor.validate()
 
 
 def test_shared_event_fixture() -> None:

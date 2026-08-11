@@ -51,6 +51,7 @@ async def test_retry_reuses_event_id() -> None:
 
     descriptor = RuntimeDescriptor(
         schema_version=1,
+        platform_version="0.1.0-alpha.3",
         suite_id="seclab.host-scanner",
         instance_id="instance-1",
         endpoint=RuntimeEndpoint(kind="unix", base_url="http://local"),
@@ -75,6 +76,7 @@ async def test_https_mock_uses_bearer_authentication() -> None:
 
     descriptor = RuntimeDescriptor(
         schema_version=1,
+        platform_version="0.1.0-alpha.3",
         suite_id="seclab.packet",
         instance_id="instance-2",
         endpoint=RuntimeEndpoint(kind="https", base_url="https://agent.example"),
@@ -105,6 +107,7 @@ async def test_client_error_is_not_retried() -> None:
 
     descriptor = RuntimeDescriptor(
         schema_version=1,
+        platform_version="0.1.0-alpha.3",
         suite_id="seclab.host-scanner",
         instance_id="instance-1",
         endpoint=RuntimeEndpoint(kind="unix", base_url="http://local"),

@@ -113,7 +113,12 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy -p seclab-suite-runtime-sdk --all-targets --all-features -- -D warnings
           cargo test -p seclab-suite-runtime-sdk --all-targets
-          cargo package -p seclab-suite-runtime-sdk --list >/dev/null
+          cargo package -p seclab-suite-runtime-sdk
+          PACKAGE_PATH="$(find target/package -maxdepth 1 -type f -name 'seclab-suite-runtime-sdk-*.crate' -print -quit)"
+          PACKAGE_DIR="$(mktemp -d)"
+          tar -xzf "$PACKAGE_PATH" -C "$PACKAGE_DIR"
+          PACKAGE_MANIFEST="$(find "$PACKAGE_DIR" -mindepth 2 -maxdepth 2 -name Cargo.toml -print -quit)"
+          cargo test --manifest-path "$PACKAGE_MANIFEST" --all-targets
 
       - name: Set up Python
         if: inputs.sdk == 'python'

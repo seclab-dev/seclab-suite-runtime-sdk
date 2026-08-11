@@ -10,6 +10,7 @@ use crate::{Error, Result};
 #[serde(rename_all = "camelCase")]
 pub struct RuntimeDescriptor {
     pub schema_version: u32,
+    pub platform_version: String,
     pub suite_id: String,
     pub instance_id: String,
     pub endpoint: RuntimeEndpoint,
@@ -74,7 +75,11 @@ impl RuntimeDescriptor {
     }
 
     fn validate(&self) -> Result<()> {
-        if self.schema_version != 1 || self.suite_id.is_empty() || self.instance_id.is_empty() {
+        if self.schema_version != 1
+            || semver::Version::parse(&self.platform_version).is_err()
+            || self.suite_id.is_empty()
+            || self.instance_id.is_empty()
+        {
             return Err(Error::InvalidDescriptor(
                 "schema version and instance identity are required".to_string(),
             ));

@@ -11,10 +11,19 @@ import httpx
 from .descriptor import RuntimeDescriptor
 from .errors import AgentError, InvalidDescriptor
 from .operation_logs import OperationEvent
+from .types import (
+    CaptureEndpoint,
+    StartCaptureResponse,
+    StartWorkloadRequest,
+    StartWorkloadResponse,
+    WorkloadSummary,
+    WorkloadTransport,
+)
 
 DEFAULT_RUNTIME_PATH = "/run/seclab-agent/runtime.json"
 OPERATION_EVENT_PATH = "/api/v1/agent/suite-runtime/operation-events"
 MAX_ATTEMPTS = 3
+WORKLOADS_PATH = "/api/v1/agent/suite-runtime/workloads"
 
 
 class RuntimeClient:
@@ -82,6 +91,57 @@ class RuntimeClient:
                 if response.is_client_error or attempt + 1 == MAX_ATTEMPTS:
                     raise self._agent_error(response)
             await asyncio.sleep(0.1 * (2**attempt))
+
+    async def start_workload(self, payload: StartWorkloadRequest) -> StartWorkloadResponse:
+        response = await self.request("POST", WORKLOADS_PATH, json=payload.to_dict())
+        body = response.json()
+        return StartWorkloadResponse(
+            workload_id=body["workloadId"],
+            container_id=body["containerId"],
+            status=body["status"],
+        )
+
+    async def list_workloads(self) -> list[WorkloadSummary]:
+        response = await self.request("GET", WORKLOADS_PATH)
+        return [
+            WorkloadSummary(
+                workload_id=item["workloadId"],
+                suite_id=item["suiteId"],
+                suite_instance_id=item["suiteInstanceId"],
+                workload_kind=item["workloadKind"],
+                name=item["name"],
+                image=item["image"],
+                status=item["status"],
+                container_id=item["containerId"],
+            )
+            for item in response.json()
+        ]
+
+    async def delete_workload(self, workload_id: str) -> None:
+        await self.request("DELETE", f"{WORKLOADS_PATH}/{workload_id}")
+
+    async def start_capture(self, workload_id: str) -> StartCaptureResponse:
+        response = await self.request("POST", f"{WORKLOADS_PATH}/{workload_id}/captures")
+        body = response.json()
+        return StartCaptureResponse(
+            capture_id=body["captureId"],
+            status=body["status"],
+            endpoints=tuple(
+                CaptureEndpoint(
+                    endpoint_id=item["endpointId"],
+                    host_port=item["hostPort"],
+                    protocol=WorkloadTransport(item["protocol"]),
+                )
+                for item in body["endpoints"]
+            ),
+        )
+
+    async def finish_capture(self, workload_id: str, capture_id: str) -> bytes:
+        response = await self.request(
+            "POST",
+            f"{WORKLOADS_PATH}/{workload_id}/captures/{capture_id}/finish",
+        )
+        return response.content
 
     async def aclose(self) -> None:
         await self._http.aclose()

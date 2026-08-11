@@ -1,8 +1,22 @@
 use seclab_suite_runtime::{OperationEvent, RuntimeDescriptor};
+use std::path::Path;
+
+fn assert_shared_fixture_matches(relative_path: &str, packaged_fixture: &str) {
+    let shared = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../contracts/fixtures")
+        .join(relative_path);
+    if shared.exists() {
+        assert_eq!(
+            std::fs::read_to_string(shared).unwrap().trim(),
+            packaged_fixture.trim()
+        );
+    }
+}
 
 #[test]
 fn shared_fixtures_match_rust_types() {
-    let runtime = include_str!("../../../contracts/fixtures/runtime/uds-valid.json");
+    let runtime = include_str!("fixtures/runtime/uds-valid.json");
+    assert_shared_fixture_matches("runtime/uds-valid.json", runtime);
     let descriptor: RuntimeDescriptor = serde_json::from_str(runtime).unwrap();
     assert_eq!(descriptor.schema_version, 1);
     assert!(
@@ -15,11 +29,13 @@ fn shared_fixtures_match_rust_types() {
             .require_identity("seclab.packet", "instance-1")
             .is_err()
     );
-    let https = include_str!("../../../contracts/fixtures/runtime/https-valid.json");
+    let https = include_str!("fixtures/runtime/https-valid.json");
+    assert_shared_fixture_matches("runtime/https-valid.json", https);
     let https: RuntimeDescriptor = serde_json::from_str(https).unwrap();
     assert_eq!(https.suite_id, "seclab.packet");
 
-    let event = include_str!("../../../contracts/fixtures/operation-events/success.json");
+    let event = include_str!("fixtures/operation-events/success.json");
+    assert_shared_fixture_matches("operation-events/success.json", event);
     let event: OperationEvent = serde_json::from_str(event).unwrap();
     assert_eq!(event.event_code, "scan_submitted");
 }

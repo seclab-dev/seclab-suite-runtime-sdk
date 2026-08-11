@@ -1,11 +1,21 @@
 """Agent 注入的套件 Runtime 描述。"""
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
 from .errors import CapabilityDenied, InvalidDescriptor
+
+SEMVER_PATTERN = re.compile(
+    r"^(0|[1-9][0-9]*)\."
+    r"(0|[1-9][0-9]*)\."
+    r"(0|[1-9][0-9]*)"
+    r"(?:-(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+    r"(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$"
+)
 
 
 @dataclass(frozen=True)
@@ -21,6 +31,7 @@ class RuntimeEndpoint:
 @dataclass(frozen=True)
 class RuntimeDescriptor:
     schema_version: int
+    platform_version: str
     suite_id: str
     instance_id: str
     endpoint: RuntimeEndpoint
@@ -51,6 +62,7 @@ class RuntimeDescriptor:
                 raise InvalidDescriptor(f"unsupported endpoint kind: {kind}")
             descriptor = cls(
                 schema_version=int(value["schemaVersion"]),
+                platform_version=str(value["platformVersion"]),
                 suite_id=str(value["suiteId"]),
                 instance_id=str(value["instanceId"]),
                 endpoint=endpoint,
@@ -63,7 +75,12 @@ class RuntimeDescriptor:
         return descriptor
 
     def validate(self) -> None:
-        if self.schema_version != 1 or not self.suite_id or not self.instance_id:
+        if (
+            self.schema_version != 1
+            or SEMVER_PATTERN.fullmatch(self.platform_version) is None
+            or not self.suite_id
+            or not self.instance_id
+        ):
             raise InvalidDescriptor("schema version and instance identity are required")
         if any(not capability.strip() for capability in self.capabilities):
             raise InvalidDescriptor("capabilities must not contain empty values")

@@ -17,6 +17,7 @@ async fn uds_retry_reuses_the_same_event_id() {
         &descriptor,
         serde_json::json!({
             "schemaVersion": 1,
+            "platformVersion": "0.1.0-alpha.3",
             "suiteId": "seclab.host-scanner",
             "instanceId": "instance-1",
             "endpoint": {
